@@ -3,26 +3,92 @@
 <head>
 <meta charset="utf-8">
 <title>仙人微彩计算工具</title>
+<style type="text/css">
+	input{
+		width: 50px;
+		height: 50px;
+		text-align: center;
+	}
+</style>
 </head>
 <body>
     <h1>仙人微彩计算工具</h1>
-    <p>说明：计算已知情况下获得最多金蝶币的选线方案。</p>
-	<p>操作方法：在游戏内掀开3个位置后，把已知的共4个位置的数字填入本页对应的框中，点击提交会为你选出金蝶币获得期望值最高的选线方案。需要重制时请直接F5刷新网页。</p>
-	<table>
-		<tr>
-			<td><input type="text"></td>
-			<td><input type="text"></td>
-			<td><input type="text"></td>
-		</tr>
-		<tr>
-			<td><input type="text"></td>
-			<td><input type="text"></td>
-			<td><input type="text"></td>
-		</tr>
-		<tr>
-			<td><input type="text"></td>
-			<td><input type="text"></td>
-			<td><input type="text"></td>
-		</tr>
+    <p>说明：计算已知情况下获得最多金蝶币的<b>选线方案</b>。</p>
+	<p>操作方法：在游戏内掀开3个位置后，把已知的共4个位置的数字填入本页对应的框中（未知位置请留空），点击提交会为你选出金蝶币获得期望值最高的选线方案（可能不唯一）。需要重置时请直接F5刷新网页。</p>
+	<p>注意：<s>由于作者偷懒</s>当输入内容不正确时可能出现任何情况，包括但不限于答案错误、点击按钮后没有反应。请认真检查输入内容以获得正确答案。</p>
+	<p>此外，由于计算机语言本身处理浮点数（即小数）时会出现误差的问题，小概率情况下获得的答案可能和手动计算答案有误差，但可以保证误差不超过1金蝶币。</p>
+	<form id="contactform">
+		<table>
+			<tr>
+				<td><input type="text" name="0"></td>
+				<td><input type="text" name="1"></td>
+				<td><input type="text" name="2"></td>
+			</tr>
+			<tr>
+				<td><input type="text" name="3"></td>
+				<td><input type="text" name="4"></td>
+				<td><input type="text" name="5"></td>
+			</tr>
+			<tr>
+				<td><input type="text" name="6"></td>
+				<td><input type="text" name="7"></td>
+				<td><input type="text" name="8"></td>
+			</tr>
+		</table>
+		<input type="submit" id="submit" value="提交">
+	</form>
+	<script>
+		var rest=[0,1,2,3,4,5,6,7,8];
+		var expect= new Array; //123：横向三行从上到下，456：纵向三列从左到右，7：左上到右下，8：右上到左下；
+		var answer=[];
+		var choose=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+		var numbers=new Array();
+		var bonus = [10000,36,720,360,80,252,108,72,54,180,72,180,119,36,306,1080,144,1800,3600];
+		document.getElementById('contactform').addEventListener('submit',submitForm);
+		
+		function submitForm(content){
+			content.preventDefault();
+			for(var i=0;i<9;i++){
+				if(document.getElementsByName(i)[0].value==""){
+					numbers[i]=-1;
+				}
+				else{
+					numbers[i]=Number(document.getElementsByName(i)[0].value) -1;
+					rest.splice(rest.indexOf(Number(numbers[i])),1);
+				}
+			}
+			for(var i=0;i<8;i++){
+				expect[i]=cal(...choose[i]);
+			}
+			var flag=Math.max(...expect);
+			for(var i=0;i<9;i++){
+				if((!(expect[i]>flag))&&(!(expect[i]<flag))){
+					answer=answer.concat(choose[i]);
+					console.log(answer);
+				}
+			}
+			for(var i=0;i<answer.length;i++){
+				document.getElementsByName(answer[i])[0].style.background = "yellow";
+			}
+		}
+		function cal(a,b,c){
+			var sum = 0;
+			var times = 0;
+			var a_rest = (numbers[a]==-1)?rest:[numbers[a]];
+			var b_rest = (numbers[b]==-1)?rest:[numbers[b]];
+			var c_rest = (numbers[c]==-1)?rest:[numbers[c]];
+			for(var i=0;i<a_rest.length;i++){
+				for(var j=0;j<b_rest.length;j++){
+					if(b_rest[j]==a_rest[i]){continue;}
+					for(var k=0;k<c_rest.length;k++){
+						if((c_rest[k]==a_rest[i]) || (c_rest[k]==b_rest[j])){continue;}
+						sum += bonus[a_rest[i]+b_rest[j]+c_rest[k]-3];
+						times+=1;
+					}
+				}
+			}
+			return sum/times;
+		}
+	</script>
 </body>
 </html>
