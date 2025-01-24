@@ -400,13 +400,12 @@ OnTriggerEnter2D和OnCollisionEnter2D两个函数的区别会在后面为敌人�
 但如果对现在存在在主界面中的敌人进行更改，不会立即反应在预制件中，若想在制作预制件后进行更改，请双击资源库中的预制件更改，也可以更改主界面中的敌人后在属性面板右上方点击Override - Override All；若想让预制件覆盖更改后的主界面中的敌人，请点击Override - Revert All
 ```
 
-- 此时可以把主界面中的敌人删除。选中敌人后按下Delete键即可。
 - 接下来需要放置一个生成器游戏对象，因为后续我们需要生成的脚本必须要挂载在游戏对象上才有效。因为生成器只需要存在而不需要任何可见性，所以直接添加一个空游戏对象即可，如图：
 
 
 ![add spawner](spawner.png)
 
-- 将其重命名为EnemySpawner，并添加自定义脚本“Spawner”后打开，添加如下代码：
+- 将其重命名为EnemySpawner，并添加自定义脚本“Spawner”后打开，把代码修改成如下：
 ```c#
 using UnityEngine;
 using System.Collections;
@@ -436,11 +435,75 @@ public class Spawner : MonoBehaviour
     }
 }
 ```
-- - 第二行添加的using System.Collections是包含了IEnumerator的库。IEnumerator是迭代器，可以理解为是一个子线程
-  - 先说IEnumerator spawnCO()这个函数。首先里面有一个永远循环的while，在while里我们先执行了两个操作语句，之后yield return new WaitForSeconds(...)。new WaitForSeconds()代表一个延时，函数内的参数是float或int，代表延时的时长（以秒为单位）。yield return xxx就是指暂时跳出子线程并返回一个延时。也就是说，在这个子线程内我们会永远循环“执行操作”-“等待一段时间”这两件事。
+-先说IEnumerator spawnCO()这个函数相关的内容：
+  - 第二行添加的using System.Collections是包含了IEnumerator的库。IEnumerator是迭代器，可以理解为是一个子线程
+  - 首先里面有一个永远循环的while，在while里我们先执行了两个操作语句，之后yield return new WaitForSeconds(...)。new WaitForSeconds()代表一个延时，函数内的参数是float或int，代表延时的时长（以秒为单位）。yield return xxx就是指暂时跳出子线程并返回一个延时。
   - Random.Range(2,5)是一个简单的随机数，意味着生成[2,5)之间的随机整数，注意这是一个左闭右开的区间，意味着生成的随机数只可能是2、3、4中的一个。
   ```
   传入的参数也可以是小数（float），此时区间为左闭右闭，即两头都包括。
   只要其中一个参数是float，就会以float模式计算。
   ```
-  - 
+  - 如果上面的解释都没有看懂，没有关系，你需要知道的是下面这个函数
+  ```c#
+  public IEnumerator spawnCO()
+    {
+        while (true)
+        {
+            ... //语句
+            yield return new WaitForSeconds(n);
+        }
+    }
+  ```
+  会产生一个无限循环执行“执行语句”-“等待n秒”的、平行于主进程的子进程就可以了。
+  - 那么在while循环里我们究竟执行了什么？首先我们使用Instantiate函数创建了一个Enemy的实例（请注意目前为止这个Enemy不等于我们在Unity里的Enemy，因为它是这个脚本中Start函数上面两行所定义的Enemy变量），也就是用Enemy这个模板复制出了一个敌人，其transform parent是这个脚本所附着的对象（也就是Unity中的EnemySpawner），这意味着敌人的坐标原点位于脚本附着的对象中心。
+  - 这个复制出的敌人被我们赋值给一个新建的游戏对象newEnemy。之后对newEnemy的transform进行更改，也就是对刚才复制出来的敌人位置进行更改。
+  - transform.localPosition是本地坐标，也就是相对于它的transform parent，它的坐标为多少。如果不使用transform.localPosition而是使用和前面小方块一样的transform.position，则需要根据全局坐标系来设置数值。这里不展示写法了。
+  - 也就是说，“newEnemy.transform.localPosition = Vector3.zero;”这一句指令，把新复制出的敌人相对于EnemySpawner的坐标改为Vector3.zero（即(0,0,0)）。
+  - 总体来说，这个IEnumerator完成了怎样的任务呢？它每隔2~4秒就在EnemySpawner的位置生成一个Enemy。这个Enemy具有和我们之前制作的、会向左前进、会碰撞并产生碰撞事件的敌人具有完全相同的属性（除了坐标被限定）。
+
+- 接下来再来说Start函数里相关的内容：
+  - 在Start上面，我们创建了一个私有变量（private），其类型为Coroutine（进程），其变量名为spawnCOVar
+  - 在Start函数里，我们使用Unity自带的StartCoroutine()函数开启了前面提到的spawnCO线程，并把这个线程“打包”赋值给了spawnCOVar，也就是说之后如果对spawnCOVar进行操作等价于对线程spawnCO进行操作。
+
+- 最后说stopSpawn()这个函数：
+  - 当这个函数被调用时，会通过Unity自带的StopCoroutine()函数来终止线程，被终止的线程就是spawnCOVar所代表的spawnCO线程。也就是说当这个函数被调用时，一开始提到的每隔几秒钟产生一个敌人的线程就会被掐掉不再执行（没错while也会被强制掐掉）。
+
+- 万一你前面全都没看懂：这个脚本需要一个预制件作为模板，在游戏开始后就会每隔2~4秒复制一个预制件出来。当需要停止时就调用它的stopSpawn函数。
+
+- 保存后切换到Unity，等待编译完成，之后把Assets里的Enemy预制件拖放到右边属性面板里Spawner属性下的Enemy处，如图，按住红圈1处拖动到红框2处松开，也就是把之前做的预制件敌人指定为这个脚本生成的模板：
+
+
+![spawner setting](spawner_setting.png)
+
+- 接下来我们希望在小方块撞到敌人后停止敌人的生成。
+```
+实际上Time.timeScale设置为0后，敌人已经不会生成了。这里只是展示一下stopSpawn()函数的用法。
+```
+- 再次回到小方块的Movement脚本处，在Start函数上方变量定义处添加一行：
+```c#
+public Spawner spawner;
+```
+- 再把Die()修改一下：
+```c#
+public void Die()
+{
+    Debug.Log("You dead!");
+    Time.timeScale = 0;
+    spawner.stopSpawn();
+}
+```
+- 也就是添加括号里的最后一行，调用stopSpawn()函数。
+- 保存之后返回Unity界面，把左侧游戏对象列表里的EnemySpawner拖动到小方块Movement里新出现的参数“spawner”上。之后点击EnemySpawner，再点击工具栏中的十字箭头（移动），拖动坐标轴把EnemySpawner移动到原先的小圆形位置：
+
+
+![set spawner position](spawner_position.png)
+
+- 再点击左侧的Spawner，按delete键将其删除。之后就可以点击播放测试游戏了。如图所示，每隔几秒钟会从屏幕右边飞来一个红色圆球：
+
+
+![game test6](game_test6.png)
+
+- 到这里为止，我们的游戏就算做完了。你可以继续往上添加任何你想要的内容，比如添加UI-Text来显示死亡提示、添加“开始游戏”按钮……这些都可以随意尝试，网上也有大量相关的教程，在此不一一介绍了。接下来是游戏导出的部分。
+## 三、导出游戏！
+### 设置脚本顺序
+- 说实话这个不是必要的，但我非常非常建议大家手动设置脚本生成顺序，也非常建议大家一边写脚本就一边设置顺序，以免自己写了百八十个脚本之后根本不知道应该安排谁先谁后。
