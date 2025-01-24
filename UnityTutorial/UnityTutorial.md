@@ -22,17 +22,28 @@
 ## 一、 下载、安装与新建项目
 1. 下载：直接在官网下载Unity Hub，地址：[https://unity.com/cn/download](https://unity.com/cn/download)。 它是Unity官方的Unity版本控制和安装工具。Unity本身对独立游戏制作者来说是免费的，具体的收费政策可以在上述网站页面自行查看。需要这篇指南的应该一时半会儿都不会涉及到收费问题，随便用就好。
 2. 安装好Unity Hub之后打开，点击左边红框1的位置，会出现如下界面（你的应该是空的）：
-![install editor](install_editor.png)
+
+
+    ![install editor](install_editor.png)
+   
 3. 此时点击右上的红框2，弹出版本选择窗口。任何标有LTS后缀的版本都是稳定版本，推荐选个4年以内的安装。版本之前区别不会特别大（但也不小），我之后会以Unity6为例来介绍。
 4. 点击Install之后会进入这个界面，如果你只打算做windows平台的游戏，直接选好语言安装就可以了；如果你需要做安卓/IOS/MacOS平台的游戏，需要勾选对应的模块后安装（并且考虑换个教程，因为我只做过windows平台）。选好后点击右下角的Install就可以安装了！安装需要一段时间，慢慢等待吧~
-![install editor2](install_editor2.png)
+
+
+    ![install editor2](install_editor2.png)
+
 5. 安装完成后点击图中左边的红框1，切换到图中界面。此时点击右上的红框2新建项目。
-![create project](create_project.png)
+
+
+   ![create project](create_project.png)
 
 
 会出现如下界面。中间最上方的红框是选择编辑器版本，下面两个红框是选2D（上）还是3D（下）游戏。要知道的是无论2D还是3D游戏，其界面都是3D的，只是相机视角的不同。我比较常做2D游戏，之后会以2D来讲。
 在这个界面右下两个实心红框的位置，红框上面写着“Project name”的地方是项目名，通常就是你的游戏名。下面的红框是保存的位置。选项设置好后点击蓝色按钮“Create Project”创建项目。之后需要等待一段时间，5分钟以上很正常。
+    
+    
 ![create project2](create_project2.png)
+
 
 ## 二、开始做游戏！
 ### 1. 初始界面介绍：
@@ -52,9 +63,15 @@
 
 ### 2. 添加游戏对象
 - 首先我们需要添加一个物品，也就是所谓的游戏对象（GameObject）。首先右键1处（也就是上图1框内的空白处），按照画线的内容选择，依次是：2D对象 - 精灵（Sprite） - 方块。点击后就会新建一个方块游戏对象。
-![add gameobject](add_gameobject.png)
+
+
+    ![add gameobject](add_gameobject.png)
+
+  
 - 点击后，你的界面会出现一些变化：
-![add gameobject2](add_gameobject2.png)
+
+
+    ![add gameobject2](add_gameobject2.png)
 
 
 - 1是新建游戏对象的名字，可以右键重命名。对象名字可以重复，但不建议重复，在用脚本查找的时候容易出现问题。
@@ -85,9 +102,14 @@
   
 - Unity本身集成了相当强大的物理引擎，所以2可以直接通过添加一个Rigidbody2D刚体属性和一个碰撞器属性来完成。首先点击Add Component，然后在搜索框中输入Rigidbody，如图所示，选择Rigidbody 2D（一定要有2D的那个）
 
+
     ![add rigidbody](add_rigidbody.png)
+
+  
 - 在新出现的属性里把带红线的部分调成和下图一致。这三个地方从上到下依次是：
-![rigidbody](rigidbody.png)
+
+  
+    ![rigidbody](rigidbody.png)
 
   - Collision Detection碰撞检测：离散/连续 ->选择“连续”（对于本教程问题不大，不改也行，但对于非常小的物品来说连续更精准，但消耗更多计算量，可能会使游戏变卡）
   - Sleeping Mode睡眠模式：永不睡眠/保持唤醒/持续睡眠 ->选择“永不睡眠”。选择永不睡眠时，永远对其保持碰撞检测；选择保持唤醒时，只有在这个物品主动运动时检测碰撞；持续睡眠就是不检测。
@@ -104,11 +126,18 @@ RigidBody2D中的其他属性：
 ```
 - 之后，我们还需要添加一个Box Collider 2D方形碰撞属性，这个属性决定了方块碰撞检测范围的大小和形状。如图所示：
 
+
     ![add collider](add_collider.png)
 - 通过点击“Edit Collider”编辑碰撞器右边的图标，可以显示并更改小方块身上碰撞器的大小，如图所示，方块边缘的绿色线条就是碰撞器的范围（蓝色是我给方块改的颜色）。
-![add collider2](add_collider2.png)
+
+  
+    ![add collider2](add_collider2.png)
+
+  
 - 现在的问题是，因为小方块会自由落体，所以我们需要为它创造一个地面。和创造方块一样我们再次添加一个方形Sprite，然后拖拽四角的蓝色圆圈拉长，并放置在视野下方，如图：
-![add collider3](add_collider3.png)
+
+  
+    ![add collider3](add_collider3.png)
 - 这个地板也需要作为刚体参与碰撞，才能托住小方块。但它本身不应该因为碰撞产生任何的运动，所以我们需要为它也添加一个Rigidbody2D和一个box collider 2D。并在Rigidbody中把body type设置成static，如图：
 
     ![add collider4](add_collider4.png)
@@ -117,21 +146,37 @@ RigidBody2D中的其他属性：
     Body Type刚体类型：运动/静力/静止。运动指可以受重力、其他碰撞力的影响，也受脚本控制的影响；静力只受脚本中施加力和运动的影响；静止完全不受任何力的影响。
 
 - 现在点击界面上方的播放键，就可以测试小方块的功能2（自由落体）了：
-![game test](game_test.png)![game test2](game_test2.png)
+
+  
+    ![game test](game_test.png)
+
+    ![game test2](game_test2.png)
+
+  
 - 方块平稳地落在地板上就是正常，可以点击原先播放按钮位置的停止图标退出游戏。
 ### 5.添加自定义脚本（属性）
 - 现在需要对小方块添加能够跳跃的自定义脚本。添加自定义脚本有两种方式，一种是右键下方Assets文件夹空白位置，选择Create Monobehaviour Script，取名后拖拽到游戏对象的属性面板上，如图所示：
-![add movement](add_movement.png)
+
+  
+    ![add movement](add_movement.png)
+
+
 - 另一种是和添加自带的属性一样，点击Add Component按钮。但在搜索框内直接输入脚本名，确认没有重名后按两次回车添加。注意脚本不可以重名，也不可以和自带的属性（也就是脚本）重名。如图所示：
 
-    ![add movement2](add_movement2.png)
-→
-![add movement3](add_movement3.png)
+    ![add movement2](add_movement2.png)→![add movement3](add_movement3.png)
 
 - 等待编译完成之后双击图中红框位置，打开脚本：
-![add movement4](add_movement4.png)
+
+  
+    ![add movement4](add_movement4.png)
+
+  
 - Unity的时候你已经自动安装了VS(Visual Studio)，所以此时需要等待一下VS启动。启动完成后VS界面如图：
-![vs interface](vs_interface.png)
+
+  
+    ![vs interface](vs_interface.png)
+
+  
 很普通的程序编译器界面，没什么好介绍的，直接看代码。
 
 
@@ -189,7 +234,9 @@ RigidBody2D中的其他属性：
     }
 ```
 - - Input.GetButtonDown("Jump")是一个函数，当检测到输入“Jump”键时，它会返回True，否则返回False。“Jump”键是在Unity界面上方菜单中的Edit - Project Setting - Input Manager - Axes里定义的，如图：
-![input manager](input_manager.png)
+
+
+    ![input manager](input_manager.png)
 
   - 因为Unity本身的bug，这里自带的space也就是空格键在Unity里用不了（游戏导出后是正常的），所以我们把它删了改成其他按键，我这里设置成z（小写）。这样当我在游戏内按下z键，Input.GetButtonDown("Jump")就会返回True了。
   - transform.y <= -3.92这一句是为了防止方块在空中无限跳跃的。只有当方块的y坐标小于-3.92（也就是很接近地板的时候）才允许跳跃。
@@ -203,5 +250,7 @@ RigidBody2D中的其他属性：
 
 
 - 写完后按ctrl+s保存，返回unity界面，等待编译。完成后点击上方的播放键测试游戏，如图所示，按下z键时应该能看到方块跳起再下落，并且在空中不能二段跳：
-![game test3](game_test3.png)
+
+  
+    ![game test3](game_test3.png)
 - 到这里我们角色操控的部分就做完了！接下来要做的是敌人（障碍）的生成和敌人碰撞事件。
