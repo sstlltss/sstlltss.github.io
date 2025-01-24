@@ -223,7 +223,7 @@ RigidBody2D中的其他属性：
 ```c#
     void Update()
     {
-        if (Input.GetButtonDown("Jump") && transform.position.y <= -3.92)
+        if (Input.GetButtonDown("Jump") && transform.position.y <= -3.92f)
         {
             Jump();
         }
@@ -239,7 +239,7 @@ RigidBody2D中的其他属性：
     ![input manager](input_manager.png)
 
   - 因为Unity本身的bug，这里自带的space也就是空格键在Unity里用不了（游戏导出后是正常的），所以我们把它删了改成其他按键，我这里设置成z（小写）。这样当我在游戏内按下z键，Input.GetButtonDown("Jump")就会返回True了。
-  - transform.y <= -3.92这一句是为了防止方块在空中无限跳跃的。只有当方块的y坐标小于-3.92（也就是很接近地板的时候）才允许跳跃。
+  - transform.y <= -3.92f这一句是为了防止方块在空中无限跳跃的。只有当方块的y坐标小于-3.92（也就是很接近地板的时候）才允许跳跃。f是float的标志，在Unity中使用float格式的小数（浮点数）需要以f标出，可以理解为通常小数都需要加一个f。
   - if(Input.GetButtonDown("Jump") && transfrom.y <=3.92)，意味着检测到Jump键并且（&&）坐标符合要求（接近地板）时，才执行后续内容，也就是调用Jump()函数
 
 
@@ -436,3 +436,11 @@ public class Spawner : MonoBehaviour
     }
 }
 ```
+- - 第二行添加的using System.Collections是包含了IEnumerator的库。IEnumerator是迭代器，可以理解为是一个子线程
+  - 先说IEnumerator spawnCO()这个函数。首先里面有一个永远循环的while，在while里我们先执行了两个操作语句，之后yield return new WaitForSeconds(...)。new WaitForSeconds()代表一个延时，函数内的参数是float或int，代表延时的时长（以秒为单位）。yield return xxx就是指暂时跳出子线程并返回一个延时。也就是说，在这个子线程内我们会永远循环“执行操作”-“等待一段时间”这两件事。
+  - Random.Range(2,5)是一个简单的随机数，意味着生成[2,5)之间的随机整数，注意这是一个左闭右开的区间，意味着生成的随机数只可能是2、3、4中的一个。
+  ```
+  传入的参数也可以是小数（float），此时区间为左闭右闭，即两头都包括。
+  只要其中一个参数是float，就会以float模式计算。
+  ```
+  - 
