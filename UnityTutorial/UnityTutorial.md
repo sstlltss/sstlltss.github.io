@@ -130,8 +130,8 @@ RigidBody2D中的其他属性：
 
 - 等待编译完成之后双击图中红框位置，打开脚本：
 ![add movement4](add_movement4.png)
-- Unity的时候你已经自动安装了VS Code，所以此时需要等待一下VS Code启动。启动完成后VS Code界面如图：
-![vscode interface](vscode_interface.png)
+- Unity的时候你已经自动安装了VS(Visual Studio)，所以此时需要等待一下VS启动。启动完成后VS界面如图：
+![vs interface](vscode_interface.png)
 很普通的程序编译器界面，没什么好介绍的，直接看代码。
 
 
