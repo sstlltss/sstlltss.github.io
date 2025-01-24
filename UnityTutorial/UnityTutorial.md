@@ -119,7 +119,7 @@ RigidBody2D中的其他属性：
 - 现在点击界面上方的播放键，就可以测试小方块的功能2（自由落体）了：
 ![game test](game_test.png)![game test2](game_test2.png)
 - 方块平稳地落在地板上就是正常，可以点击原先播放按钮位置的停止图标退出游戏。
-### 5.添加自定义脚本（属性）
+### 4.添加自定义脚本（属性）
 - 现在需要对小方块添加能够跳跃的自定义脚本。添加自定义脚本有两种方式，一种是右键下方Assets文件夹空白位置，选择Create Monobehaviour Script，取名后拖拽到游戏对象的属性面板上，如图所示：
 ![add movement](add_movement.png)
 - 另一种是和添加自带的属性一样，点击Add Component按钮。但在搜索框内直接输入脚本名，确认没有重名后按两次回车添加。注意脚本不可以重名，也不可以和自带的属性（也就是脚本）重名。如图所示：
@@ -202,6 +202,190 @@ RigidBody2D中的其他属性：
   - 也就是说，每当这个函数被调用，我们就给方块一个瞬间向上的力，让它跳起。这个力的大小由speed决定，方便我们调试。
 
 
-- 写完后按ctrl+s保存，返回unity界面，等待编译。完成后点击上方的播放键测试游戏，如图所示，按下z键时应该能看到方块跳起再下落，并且在空中不能二段跳：
+- 写完后按ctrl+s保存，返回unity界面，等待编译。完成后在属性面板的Movement脚本处将Speed改为10，如图所示：
+
+
+![change jump speed](jump_speed.png)
+
+
+点击上方的播放键测试游戏，如图所示，按下z键时应该能看到方块跳起再下落，并且在空中不能二段跳：
+
+
 ![game test3](game_test3.png)
 - 到这里我们角色操控的部分就做完了！接下来要做的是敌人（障碍）的生成和敌人碰撞事件。
+
+### 5. 添加敌人（障碍）
+
+- 首先明确一下，敌人应该有以下功能：
+    1. 如果没有其他干扰，则保持水平向左前进
+    2. 可以和角色碰撞，并触发碰撞事件
+
+- 为了和小方块区分，我们添加一个圆形作为敌人，并把它调成红色（小方块的蓝色也是一样的改法）。如图所示：
+
+
+![add enemy](add_enemy.png)
+
+
+![change color](change_color.png) → ![change color2](change_color2.png)
+
+- 之后我们需要为敌人添加运动状态。我希望敌人从屏幕右边、视野外侧水平向左飞来，如果没有被角色碰到，则一路飞离视野范围。也就是说，敌人需要持续匀速地在X方向上运动，YZ方向不变，可以用Update函数来完成。首先添加一个自定义的属性EnemyMovement，如图：
+
+
+![add enemy movemnt](add_enemy_movement.png)
+
+- 双击打开脚本后，在Update函数里添加以下内容：
+
+```c#
+    void Update()
+    {
+        transform.position = transform.position + Vector3.left * speed * Time.deltaTime;
+    }
+```
+
+- - transform就是前面界面介绍的时候提到过的游戏对象的位置和旋转信息
+  - transform.position就是对象的位置信息，它的类型是一个3维的向量（Vector3），三个值分别是xyz轴的坐标
+  - Vecotr3.left = Vecotr3(-1,0,0)，也就是x方向上-1
+  - Vecotr3.left * speed * Time.deltaTime就是这一帧内敌人需要移动的距离（Time.deltaTime可以简单理解为这一帧的时间）
+  - 这一整句的意思就是，在当前位置的基础上向左移动一个speed*Time.deltaTime的距离
+
+```
+- deltaTime是游戏开发中很重要的一个概念，所以插入一点对于Time.deltaTime的讲解：
+- deltaTime是游戏从上一帧到这一帧所经过的时间，用于估计这一帧需要消耗的时间。比如我们经常说的游戏帧率30帧/秒，对应的delta time就是1/30秒。由于游戏每一帧刷新时需要调用所有活跃对象的Update函数和其他正在进行中的子线程并进行渲染，而它们的计算量每次又不一定相同，所以刷新每一帧所消耗的时间是不同的，也就是说delta time并不是一个不变的值。哪怕是锁定帧率上限，它也会浮动，这点可以从一些显示帧率的游戏中看出来，哪怕是锁60帧，帧率也会在55~65中间浮动，这是非常正常的。
+- 在我们所设计的敌人运动中，这一帧前进的距离=速度*这一帧的时长，速度是由我们设置的speed决定的，而时间就是以Time.deltaTime来计算的（实际上是以前一帧的计算时间来估计这一帧的计算时间）。
+```
+
+- 接下来需要添加敌人的碰撞事件。在碰撞发生时，Unity会自动调用名为OnTriggerEnter2D或OnCollisionEnter2D的函数，它是从MonoBehaviour继承来的，和Start以及Update一样，我们只需要为它添加内容即可。在Update后添加如下内容：
+```c#
+    public void OnTriggerEnter2D(Collider2D collision)
+    {
+        gameObject.SetActive(false);
+        collision.gameObject.GetComponent<Movement>().Die();
+    }
+```
+- - 此函数传入的参数collision是“与该对象碰撞的对象（的Collider2D属性）”，在这里相当于小方块身上的Box Collider 2D属性
+  - gameObject就是指“该脚本所附着的游戏对象”
+  - gameObject.SetActive(false)意思是把该游戏对象的活跃状态设置成false（否），也就是不活跃，在游戏内就相当于删除了
+  - collision.gameObject是获取“与该对象碰撞的对象”，在这个游戏中相当于小方块的游戏对象
+  - GetComponent<Movement>().Die()，获取小方块身上的Movement属性，并调用其中（声明为public公用的）Die函数
+    - Die函数我们暂时还没写，等下再回去添加
+
+```
+OnTriggerEnter2D和OnCollisionEnter2D两个函数的区别会在后面为敌人添加Collider属性的时候一并解释。
+```
+
+- 完成后保存并切换到Unity界面，等待编译完成。在敌人的EnemyMovement属性中，将参数改为5，如图：
+
+
+![change speed](change_speed.png)
+
+### 6. 为敌人添加刚体和碰撞器
+- 和小方块类似，敌人也需要添加刚体和碰撞器属性才能参与碰撞检测，添加方法也和小方块类似，如图，首先添加Rigidbody2D，修改图中画线部分的参数：
+
+
+![change enemy rigidbody](enemy_rigidbody.png)
+
+- - 修改的内容在前面修改小方块时已经介绍过，这里不再赘述
+
+- 因为我们的敌人是圆形的，所以碰撞器也应该是圆形的，如图所示添加一个Circle Collider 2D:
+
+
+![add enemy circle collider](enemy_collider.png)
+
+- 检查碰撞器范围（图中绿线）：
+
+
+![change enemy circle collider](enemy_collider2.png)
+
+- 与小方块与地板之间的实体碰撞不同，我们不希望敌人对小方块的运动状态产生任何影响，因此可以把敌人的is Trigger属性勾选：
+
+![change is trigger](enemy_collider3.png)
+
+```
+- 当勾选is Trigger属性时，脚本中的碰撞事件需要使用OnTrigger系列（OnTriggerEnter2D, OnTriggerExit2D, OnTriggerStay2D）；不勾选时，碰撞事件使用OnCollision系列（OnCollisionEnter2D...）
+- 当勾选is Trigger属性时，它相当于一个非实体，它与其他游戏对象的碰撞不会对双方产生任何运动上的影响，但会触发OnTrigger的事件。比如把子弹设置成Trigger就不会对角色产生冲击力，但可以对角色造成伤害。
+```
+- 之后需要在主界面中将敌人放置在小方块落地后水平方向能够碰撞到的位置，但放在白色相机框（视野区域）以外的右侧，如图：
+
+
+![game test5](game_test5.png)
+
+### 7. 为角色设置碰撞事件
+- 在5.添加敌人的部分，我们在代码中要求碰撞时调用角色身上的Die函数，但这个函数我们还没写，现在补上。
+- 在角色被敌人撞到时，从角色的角度我们希望角色能够停止运动，也不再接收任何输入，或者说直接让游戏停止。这些可以写在Die函数里。
+- 再次打开小方块身上的Movement脚本，在Jump函数后添加以下函数：
+
+```c#
+    public void Die()
+    {
+        Debug.Log("You dead!");
+        Time.timeScale = 0;
+    }
+```
+
+- - Debug.Log()是前面提到过的提示信息，在导出游戏后不会出现，仅在Unity编辑器里可以看到
+  - Time.timeScale是Unity内置的时间缩放，默认值为1（一倍时间），设置成0就相当于冻结时间。也可以设置为其他值比如0.5、3来调整时间。部分游戏的子弹时间就是用这个做的（但严格来说比较建议手动设置一个时间缩放，因为这个有时候还是挺坑的……）
+- 这样，在敌人与小方块碰撞后，首先Unity会自动调用敌人的OnTriggerEnter2D函数，敌人变为非活跃，随后立即调用小方块身上的Die函数，输出调试信息并冻结时间。
+- 保存后切换到Unity，点击红框位置，把主界面下面的窗口切换到Console（控制台），也就是输出调试或错误信息的地方。之后点击上方播放键测试一下，在碰撞后能看到出现调试信息，敌人也消失就是没有问题，如图：
+
+
+![game test4](game_test4.png)
+
+### 8. 设置敌人生成器
+- 在游戏中，我们显然不能只有这一个敌人。但手动做上百个敌人又并不现实。考虑到小圆球可以重复利用，我们可以制作一个Spawner生成器。
+- 首先我们需要把刚才制作好的敌人做成Prefab预制件，这样它就会被储存到本地文件中，可以通过脚本重复生成。可以理解为制作了一个模具，之后可以用它来复制出很多个一模一样的敌人。制作预制件的方法很简单，首先点击下方窗口的Project（红框1），切换到资源库界面，再单击左边的Assets文件夹（红框2），此时红框3中应该如图所示显示Assets：
+
+
+![add prefab1](prefab.png)
+
+- 之后拖拽左上游戏对象列表中的Enemy（或主界面中的小圆球）到下方空白处，也就是把下图中的1或3拖动到2处放手：
+
+
+![add prefab2](prefab2.png)
+
+- 随后就可以看到资源库内多出了一个蓝色立方体，名为Enemy，如图：
+
+
+![add prefab3](prefab3.png)
+
+- 这个立方体Enemy（也可能随后显示为小圆球）就是一个预制件，可以通过脚本重复生成啦！如果你单击这个预制件，就会发现右边属性面板里它拥有和主界面中的敌人一模一样的属性。
+
+```
+但如果对现在存在在主界面中的敌人进行更改，不会立即反应在预制件中，若想在制作预制件后进行更改，请双击资源库中的预制件更改，也可以更改主界面中的敌人后在属性面板右上方点击Override - Override All；若想让预制件覆盖更改后的主界面中的敌人，请点击Override - Revert All
+```
+
+- 此时可以把主界面中的敌人删除。选中敌人后按下Delete键即可。
+- 接下来需要放置一个生成器游戏对象，因为后续我们需要生成的脚本必须要挂载在游戏对象上才有效。因为生成器只需要存在而不需要任何可见性，所以直接添加一个空游戏对象即可，如图：
+
+
+![add spawner](spawner.png)
+
+- 将其重命名为EnemySpawner，并添加自定义脚本“Spawner”后打开，添加如下代码：
+```c#
+using UnityEngine;
+using System.Collections;
+
+public class Spawner : MonoBehaviour
+{
+    public GameObject Enemy;
+    private Coroutine spawnVar;
+
+    void Start()
+    {
+        spawnVar = StartCoroutine(spawnCO());
+    }
+
+    public IEnumerator spawnCO()
+    {
+        while (true)
+        {
+            GameObject newEnemy = Instantiate(Enemy, transform);
+            newEnemy.transform.localPosition = Vector3.zero;
+            yield return new WaitForSeconds(Random.Range(2, 5));
+        }
+    }
+    public void stopSpawn()
+    {
+        StopCoroutine(spawnVar);
+    }
+}
+```
