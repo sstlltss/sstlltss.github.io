@@ -1,2 +1,7 @@
-ObsidianGit/**
+ObsidianGit/.obsidian
+ObsidianGit/AllenGit/*
+!ObsidianGit/AllenGit/Masterarbeit
+ObsidianGit/AllenGit/Masterarbeit/*
 !ObsidianGit/AllenGit/Masterarbeit/TODOs.md
+!ObsidianGit/AllenGit/Masterarbeit/Problems.md
+!ObsidianGit/AllenGit/Masterarbeit/DailyRecords.md
