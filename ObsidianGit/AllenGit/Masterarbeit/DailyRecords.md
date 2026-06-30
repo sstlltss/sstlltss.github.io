@@ -4,3 +4,11 @@
 
 ### 27.06.2026
 - running finetuning_data_prepare.py
+
+### 29.06.2026
+- keep debugging finetuning_data_prepare.py
+- continue data processing on LUIS
+
+### 30.06.2026
+- finetuning_data_prepare.py
+	- OOM Error: optimizing...
