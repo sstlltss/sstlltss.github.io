@@ -10,9 +10,11 @@
 - continue data processing on LUIS
 
 ### 30.06.2026
-- finetuning_data_prepare.py
+- finetuning_data_prepare.py -> finished!!!
 	- OOM Error: optimizing... -> read as chunks
 
+### 01.07.2026
+- now working on: finetuning.py
 
 ## Processing record
 - Original data we have: 
@@ -24,11 +26,21 @@
 - Data processing for fastq:
 	1. [alignment with Bismark](D:\Study\LUH5\Codes\bismark_alignment.sh)
 	2. [sort in name with Samtools, then deduplication with Bismark](D:\Study\LUH5\Codes\bismark_deduplication.txt)
-	3. [extraction with Bismark](D:\Study\LUH5\Codes\bismark_deduplication.sh), only keep .cov files (and .bedGraph but not used for so far)
-	4. for all the cov files, split them by chromosomes
-		- ready for DMRs analysis
-	5. for all the original cov files, start -1 to align to 450k Array's position
-		- ready for MethyLYZR
+	3. [extraction with Bismark](D:\Study\LUH5\Codes\bismark_deduplication.sh), only keep .cov files (and .bedGraph for just in case; not used for so far)
+	4. for all the origin .cov files...
+		1. split them by chromosomes
+			- ready for DMRs analysis
+		2. start -1 to align to 450k Array's position
+			- ready for MethyLYZR
 - Data processing for .pat.gz:
-	1. sum up to cov(where is the script???)
-	2. filter with and start+1 to align to 450k Array
+	1. sum up to cov files(where is my script???)
+		- start +2 and split by chromosomes for DMRs analysis
+	2. filter with 450k Sites and start+1 to align to 450k Array
+		- ready for MethyLYZR
+- DMRs analysis: [see shell](D:\Study\LUH5\Codes\dss_dmr.R)
+- Get 450k Array annotation
+- MethyLYZR
+	1. data preparation: [see shell](D:\Study\LUH5\Codes\lyzr_data_preparation.py)
+		1. samples that only match a few probes(<20000) with 450k Array will be dropped
+		2. probes that appear in less than 50% of samples will be dropped
+		3. since the presence of a probe exhibits high cancer specificity, imputing missing value using the mean for that specific site in the same cancer type may not yield a valid result. Therefore, use the mean value of the existing sites of the same cancer to fill NA values.
