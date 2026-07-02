@@ -5,12 +5,12 @@
 
 ### LUIS
 
-|       | fastq | bam               | cov      |
-| ----- | ----- | ----------------- | -------- |
-| CC    | -     | 30                | done     |
-| DLBCL | -     | 20                | done     |
-| GC    | 600/2 | 150 in processing | queueing |
-| PC    | 38/2  | queueing          | queueing |
+|       | fastq | bam      | cov      |
+| ----- | ----- | -------- | -------- |
+| CC    | -     | 30       | all done |
+| DLBCL | -     | 20       | all done |
+| GC    | 600/2 | 71       | 71 done  |
+| PC    | 38/2  | queueing | queueing |
 ### MethylBERT
 - [ ] Data pre-processing: multi-cancer-type input -> need to test
 - [ ] Fine-tuning: classifier -> need to test

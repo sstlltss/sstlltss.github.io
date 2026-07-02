@@ -16,12 +16,15 @@
 ### 01.07.2026
 - now working on: finetuning.py
 
+### 02.07.2026
+- found new bugs in finetuning_data_prepare.py... 😡
+
 ## Processing record
 - Original data we have: 
-	1. DLBCL WGBS data in .fastq.gz
-	2. colorectal cancer scBS-seq data in .fastq.gz
-	3. pancreatic cancer WGBS data in .fastq.gz
-	4. gastrointestinal cancers targeted BS-seq data in .fastq.gz
+	1. **DLBCL** WGBS data in .fastq.gz
+	2. **colorectal cancer** scBS-seq data in .fastq.gz
+	3. **pancreatic cancer** WGBS data in .fastq.gz
+	4. **gastrointestinal cancers** targeted BS-seq data in .fastq.gz
 	5. normal cell atlas in .pat.gz
 - Data processing for fastq:
 	1. [alignment with Bismark](D:\Study\LUH5\Codes\bismark_alignment.sh)
