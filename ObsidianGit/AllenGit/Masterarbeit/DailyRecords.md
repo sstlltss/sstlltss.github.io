@@ -19,13 +19,42 @@
 ### 02.07.2026
 - found new bugs in finetuning_data_prepare.py... 😡
 
+### 03.07.2026
+- working on finetuning.py
+
+### 06.07.2026
+- working on methylseq_simulation: asked Stefan for some help...
+- get normal cell(B-cell) .bam files from Stefan's folder.
+- testing: finetuning.py
+
+### 08.07.2026
+- methylbert debugging...
+- take a look at TNT LLM
+
+### 13.07.2026
+- methylbert running -> load to gpu(finished)
+- next steps:
+	- extraction of normal cells (b-cells dataset on luis from Stefan) -> get .cov
+		- methylbert: do dmr -> fine-tuning-data-generate -> fine-tuning
+		- methylyzr: run
+
+### 14.07.2026
+- test methylbert with small train&test data -> overfit ->model can learn correctly
+- test methylbert with giant train & test data -> high train loss + lower test loss -> check the data generator and try once more
+- finished chapter "relative works" of my thesis
+- filter the .cov files with 450k Array(prepare for methylyzr):
+	- DLBCL and PC works fine(~400k matched)
+	- CC really bad (~10k matched) -> abandoned
+	- GC looks doable (~170k matched)
+	- B-Cells doesn't match -> aligned with hg38(by Stefan), need to re-processing, now aligning
+
 ## Processing record
 - Original data we have: 
 	1. **DLBCL** WGBS data in .fastq.gz
 	2. **colorectal cancer** scBS-seq data in .fastq.gz
 	3. **pancreatic cancer** WGBS data in .fastq.gz
 	4. **gastrointestinal cancers** targeted BS-seq data in .fastq.gz
-	5. normal cell atlas in .pat.gz
+	5. normal cell data(**B-Cells**) in .fastq.gz
 - Data processing for fastq:
 	1. [alignment with Bismark](D:\Study\LUH5\Codes\bismark_alignment.sh)
 	2. [sort in name with Samtools, then deduplication with Bismark](D:\Study\LUH5\Codes\bismark_deduplication.txt)
